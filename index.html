@@ -1,0 +1,346 @@
+       
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Space Options • Cedar Rapids</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .space-gradient { background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%); }
+    .card { transition: all 0.3s ease; }
+    .card:hover { transform: translateY(-4px); }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-200">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <div class="w-72 space-gradient p-8 flex flex-col border-r border-white/10">
+      <div class="flex items-center gap-4 mb-10">
+        <i class="fa-solid fa-cube text-cyan-400 text-4xl"></i>
+        <div>
+          <h1 class="text-3xl font-bold tracking-tight">Space Options</h1>
+          <p class="text-cyan-300 text-sm">Cedar Rapids, IA</p>
+        </div>
+      </div>
+
+      <nav class="flex-1 space-y-2">
+        <button onclick="showView('dashboard')" class="nav-btn w-full text-left flex items-center gap-3 px-6 py-4 rounded-2xl hover:bg-white/10 text-lg font-medium">
+          <i class="fa-solid fa-house"></i> Dashboard
+        </button>
+        <button onclick="showView('inventory')" class="nav-btn w-full text-left flex items-center gap-3 px-6 py-4 rounded-2xl hover:bg-white/10 text-lg font-medium">
+          <i class="fa-solid fa-boxes-stacked"></i> Inventory
+        </button>
+        <button onclick="showView('restock')" class="nav-btn w-full text-left flex items-center gap-3 px-6 py-4 rounded-2xl hover:bg-white/10 text-lg font-medium">
+          <i class="fa-solid fa-plus-circle"></i> Restock / Add Item
+        </button>
+        <button onclick="showView('log')" class="nav-btn w-full text-left flex items-center gap-3 px-6 py-4 rounded-2xl hover:bg-white/10 text-lg font-medium">
+          <i class="fa-solid fa-clock-rotate-left"></i> Activity Log
+        </button>
+      </nav>
+
+      <div class="pt-8 border-t border-white/10 text-xs text-slate-400">
+        Connected to Google Sheet • Live Updates<br>
+        Space Options Closet Shelving
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+      <header class="bg-white/5 border-b border-white/10 px-10 py-6 flex justify-between items-center">
+        <h2 id="pageTitle" class="text-3xl font-semibold">Dashboard</h2>
+        <button onclick="refreshAll()" 
+                class="px-6 py-3 bg-cyan-500 hover:bg-cyan-600 rounded-2xl flex items-center gap-3 font-medium transition-colors">
+          <i class="fa-solid fa-rotate"></i>
+          Refresh Live Data
+        </button>
+      </header>
+
+      <div class="flex-1 overflow-auto p-10" id="mainContent">
+        <!-- Content loaded by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby6_Z3xN-b1Po6jiC2GPTpq-0MRTljSHveEltzsjjMLEd-K3ATu0cTFOue2GRuYoa2qkg/exec";
+    const SECRET_KEY = "spaceoptions2026";
+
+    let inventoryData = [];
+
+    async function fetchData(action) {
+      try {
+        const res = await fetch(`${WEB_APP_URL}?action=${action}`);
+        if (!res.ok) throw new Error("Failed to fetch");
+        return await res.json();
+      } catch (e) {
+        console.error(e);
+        alert("⚠️ Could not connect to Google Sheet. Please check the web app deployment.");
+        return [];
+      }
+    }
+
+    async function postData(payload) {
+      payload.secret = SECRET_KEY;
+      try {
+        const res = await fetch(WEB_APP_URL, {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: { "Content-Type": "application/json" }
+        });
+        return await res.json();
+      } catch (e) {
+        alert("Error saving data. Please try again.");
+        return { success: false };
+      }
+    }
+
+    async function loadInventory() {
+      inventoryData = await fetchData("getInventory");
+    }
+
+    async function loadLog() {
+      return await fetchData("getLog");
+    }
+
+    async function refreshAll() {
+      await loadInventory();
+      renderCurrentView();
+      alert("✅ Live data refreshed from your Google Sheet!");
+    }
+
+    function showView(view) {
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-white/10'));
+      document.querySelector(`button[onclick="showView('${view}')"]`).classList.add('bg-white/10');
+      
+      const titles = {
+        dashboard: "Dashboard",
+        inventory: "Full Inventory",
+        restock: "Restock / Add New Item",
+        log: "Activity Log"
+      };
+      document.getElementById("pageTitle").textContent = titles[view];
+      renderView(view);
+    }
+
+    async function renderCurrentView() {
+      const title = document.getElementById("pageTitle").textContent;
+      let view = "dashboard";
+      if (title === "Full Inventory") view = "inventory";
+      else if (title === "Restock / Add New Item") view = "restock";
+      else if (title === "Activity Log") view = "log";
+      renderView(view);
+    }
+
+    async function renderView(view) {
+      const content = document.getElementById("mainContent");
+      
+      if (view === "dashboard") {
+        await loadInventory();
+        const lowStock = inventoryData.filter(i => (i["Current Stock"] || 0) <= (i["Reorder Level"] || 999));
+        const totalValue = inventoryData.reduce((sum, i) => sum + ((i["Current Stock"] || 0) * (i["Price"] || 0)), 0);
+
+        content.innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-white/5 rounded-3xl p-8 card">
+              <p class="text-cyan-400 text-sm">Total Products</p>
+              <p class="text-6xl font-bold mt-3">${inventoryData.length}</p>
+            </div>
+            <div class="bg-white/5 rounded-3xl p-8 card">
+              <p class="text-amber-400 text-sm">Low Stock Items</p>
+              <p class="text-6xl font-bold mt-3">${lowStock.length}</p>
+            </div>
+            <div class="bg-white/5 rounded-3xl p-8 card">
+              <p class="text-emerald-400 text-sm">Estimated Inventory Value</p>
+              <p class="text-6xl font-bold mt-3">$${totalValue.toFixed(0)}</p>
+            </div>
+          </div>
+
+          <h3 class="text-xl font-semibold mb-4">Low Stock Alerts</h3>
+          <div class="bg-white/5 rounded-3xl p-6">
+            ${lowStock.length ? lowStock.map(item => `
+              <div class="flex justify-between py-4 border-b border-white/10 last:border-none">
+                <span>${item["Product Name"] || "Unnamed Item"}</span>
+                <span class="text-amber-400 font-medium">${item["Current Stock"]} left (reorder at ${item["Reorder Level"]})</span>
+              </div>
+            `).join('') : '<p class="text-slate-400 py-8 text-center">No low stock items — great job managing inventory!</p>'}
+          </div>
+        `;
+      } 
+      else if (view === "inventory") {
+        await loadInventory();
+        let html = `
+          <input id="searchInput" placeholder="Search products..." 
+                 class="w-full mb-8 bg-white/10 border border-white/20 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-cyan-400">
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-full">
+              <thead>
+                <tr class="border-b border-white/20 text-cyan-300 text-left">
+                  <th class="py-5 px-4">Item ID</th>
+                  <th class="py-5 px-4">Product Name</th>
+                  <th class="py-5 px-4">Category</th>
+                  <th class="py-5 px-4 text-right">Stock</th>
+                  <th class="py-5 px-4 text-right">Price</th>
+                  <th class="py-5 px-4 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryTable"></tbody>
+            </table>
+          </div>
+        `;
+        content.innerHTML = html;
+
+        const tbody = document.getElementById("inventoryTable");
+        inventoryData.forEach(item => {
+          const stock = item["Current Stock"] || 0;
+          const reorder = item["Reorder Level"] || 999;
+          const isLow = stock <= reorder;
+          
+          const row = document.createElement("tr");
+          row.className = `border-b border-white/10 hover:bg-white/5 ${isLow ? 'bg-amber-950/30' : ''}`;
+          row.innerHTML = `
+            <td class="py-5 px-4 font-mono">${item["Item ID"] || ''}</td>
+            <td class="py-5 px-4">${item["Product Name"] || ''}</td>
+            <td class="py-5 px-4">${item["Category"] || ''}</td>
+            <td class="py-5 px-4 text-right ${isLow ? 'text-amber-400 font-bold' : ''}">${stock}</td>
+            <td class="py-5 px-4 text-right">$${(item["Price"] || 0).toFixed(2)}</td>
+            <td class="py-5 px-4 text-center">
+              <button onclick="adjustStock('${item["Item ID"]}')" 
+                      class="text-cyan-400 hover:text-cyan-300 font-medium">Adjust Stock</button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+
+        // Simple search
+        document.getElementById("searchInput").addEventListener("input", function() {
+          const term = this.value.toLowerCase();
+          const rows = tbody.getElementsByTagName("tr");
+          for (let row of rows) {
+            row.style.display = row.textContent.toLowerCase().includes(term) ? "" : "none";
+          }
+        });
+      } 
+      else if (view === "restock") {
+        await loadInventory();
+        let options = inventoryData.map(i => 
+          `<option value="${i["Item ID"]}">${i["Product Name"]} (Current: ${i["Current Stock"] || 0})</option>`
+        ).join('');
+
+        content.innerHTML = `
+          <div class="max-w-2xl mx-auto bg-white/5 rounded-3xl p-10">
+            <h3 class="text-2xl mb-8">Restock Existing Item</h3>
+            <select id="restockItem" class="w-full bg-white/10 border border-white/20 rounded-2xl px-6 py-5 mb-6 text-lg">${options}</select>
+            <input id="restockQty" type="number" placeholder="Quantity to add" class="w-full bg-white/10 border border-white/20 rounded-2xl px-6 py-5 mb-6 text-lg">
+            <textarea id="restockNotes" placeholder="Notes (optional)" class="w-full bg-white/10 border border-white/20 rounded-2xl px-6 py-5 h-32 mb-8"></textarea>
+            <button onclick="performRestock()" 
+                    class="w-full bg-emerald-600 hover:bg-emerald-700 py-6 rounded-2xl text-xl font-semibold">✅ RESTOCK ITEM</button>
+
+            <div class="my-12 border-t border-white/10"></div>
+
+            <h3 class="text-2xl mb-8">Add Brand New Product</h3>
+            <div class="grid grid-cols-2 gap-6">
+              <input id="newId" placeholder="Item ID (e.g. SO-004)" class="bg-white/10 border border-white/20 rounded-2xl px-6 py-5">
+              <input id="newName" placeholder="Product Name" class="bg-white/10 border border-white/20 rounded-2xl px-6 py-5">
+              <input id="newCategory" placeholder="Category (Shelving, Rods, etc.)" class="bg-white/10 border border-white/20 rounded-2xl px-6 py-5">
+              <input id="newStock" type="number" placeholder="Starting Stock" class="bg-white/10 border border-white/20 rounded-2xl px-6 py-5">
+            </div>
+            <button onclick="addNewItem()" class="mt-8 w-full bg-cyan-500 hover:bg-cyan-600 py-6 rounded-2xl text-xl font-semibold">Add New Item to Inventory</button>
+          </div>
+        `;
+      } 
+      else if (view === "log") {
+        const logs = await loadLog();
+        let html = `<div class="space-y-6">`;
+        logs.forEach(log => {
+          const date = new Date(log.Timestamp);
+          html += `
+            <div class="bg-white/5 rounded-3xl p-8 flex justify-between items-start">
+              <div>
+                <div class="text-xs text-slate-400">${date.toLocaleString()}</div>
+                <div class="text-lg font-medium mt-1">${log["Action Type"]}</div>
+                <div class="text-slate-300">${log["Product Name"] || "New Item"}</div>
+              </div>
+              <div class="text-right">
+                <div class="text-2xl font-mono ${log["Quantity Change"] > 0 ? 'text-emerald-400' : 'text-rose-400'}">
+                  ${log["Quantity Change"] > 0 ? '+' : ''}${log["Quantity Change"]}
+                </div>
+                <div class="text-sm text-slate-400">New stock: ${log["New Stock Level"]}</div>
+              </div>
+            </div>`;
+        });
+        html += `</div>`;
+        content.innerHTML = html || '<p class="text-slate-400 text-center py-20">No activity logged yet.</p>';
+      }
+    }
+
+    async function performRestock() {
+      const itemId = document.getElementById("restockItem").value;
+      const quantity = parseFloat(document.getElementById("restockQty").value);
+      const notes = document.getElementById("restockNotes").value || "";
+
+      if (!itemId || !quantity || quantity <= 0) {
+        alert("Please select an item and enter a valid quantity.");
+        return;
+      }
+
+      const res = await postData({ action: "restock", itemId, quantity, notes });
+      if (res.success) {
+        alert("✅ Restock successful! Inventory updated.");
+        await loadInventory();
+        showView("inventory");
+      } else {
+        alert("Failed to restock. Please try again.");
+      }
+    }
+
+    async function adjustStock(itemId) {
+      const newStockStr = prompt("Enter the new stock level for this item:");
+      if (newStockStr === null) return;
+      const newStock = parseFloat(newStockStr);
+      if (isNaN(newStock)) return alert("Please enter a valid number.");
+
+      const res = await postData({ action: "adjustStock", itemId, quantity: newStock });
+      if (res.success) {
+        alert("✅ Stock adjusted successfully!");
+        await loadInventory();
+        showView("inventory");
+      }
+    }
+
+    async function addNewItem() {
+      const payload = {
+        action: "addNewItem",
+        itemId: document.getElementById("newId").value.trim(),
+        productName: document.getElementById("newName").value.trim(),
+        category: document.getElementById("newCategory").value.trim(),
+        currentStock: parseFloat(document.getElementById("newStock").value) || 0,
+        unit: "units",
+        reorderLevel: 5,
+        price: 49.99,
+        description: ""
+      };
+
+      if (!payload.itemId || !payload.productName) {
+        alert("Item ID and Product Name are required.");
+        return;
+      }
+
+      const res = await postData(payload);
+      if (res.success) {
+        alert("✅ New item added successfully!");
+        await loadInventory();
+        showView("inventory");
+      }
+    }
+
+    // Start the app
+    window.onload = () => {
+      showView("dashboard");
+    };
+  </script>
+</body>
+</html>
