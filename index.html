@@ -7,208 +7,173 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
-    body { background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%); }
-    .glass { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(16px); }
-    .neon-cyan { text-shadow: 0 0 15px #22d3ee; }
-    .star-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%); }
+    .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); }
+    .neon { text-shadow: 0 0 20px rgb(34, 211, 238); }
   </style>
 </head>
-<body class="min-h-screen text-white font-sans">
+<body class="min-h-screen text-white">
 
   <!-- Sidebar -->
-  <div class="fixed inset-y-0 left-0 w-64 glass border-r border-cyan-500/30 flex flex-col">
-    <div class="p-6 flex items-center gap-3 border-b border-cyan-500/30">
-      <div class="w-10 h-10 bg-cyan-400 rounded-2xl flex items-center justify-center text-slate-900 text-2xl shadow-lg shadow-cyan-500/50">📦</div>
+  <div class="fixed inset-y-0 left-0 w-72 glass border-r border-cyan-400/30 flex flex-col shadow-2xl">
+    <div class="p-8 flex items-center gap-4 border-b border-cyan-400/30">
+      <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-3xl flex items-center justify-center text-3xl shadow-xl">📦</div>
       <div>
-        <h1 class="text-2xl font-bold tracking-tighter neon-cyan">Space Options</h1>
-        <p class="text-xs text-cyan-300">Cedar Rapids, IA</p>
+        <h1 class="text-3xl font-bold tracking-tighter neon">Space Options</h1>
+        <p class="text-cyan-300 text-sm">Cedar Rapids, IA</p>
       </div>
     </div>
 
-    <nav class="flex-1 p-4">
-      <a onclick="navigate('dashboard')" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 text-cyan-300 mb-1 active" id="nav-dashboard">
-        <i class="fas fa-tachometer-alt"></i> Dashboard
+    <nav class="flex-1 p-6 space-y-2">
+      <a onclick="navigate('dashboard')" class="nav-item flex items-center gap-4 px-6 py-4 rounded-2xl text-lg hover:bg-white/10 transition active" id="nav-dashboard">
+        <i class="fas fa-tachometer-alt w-5"></i> Dashboard
       </a>
-      <a onclick="navigate('inventory')" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 text-cyan-300 mb-1" id="nav-inventory">
-        <i class="fas fa-boxes-stacked"></i> Full Inventory
+      <a onclick="navigate('inventory')" class="nav-item flex items-center gap-4 px-6 py-4 rounded-2xl text-lg hover:bg-white/10 transition" id="nav-inventory">
+        <i class="fas fa-boxes-stacked w-5"></i> Full Inventory
       </a>
-      <a onclick="navigate('restock')" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 text-cyan-300 mb-1" id="nav-restock">
-        <i class="fas fa-plus-circle"></i> Restock / Add Item
+      <a onclick="navigate('restock')" class="nav-item flex items-center gap-4 px-6 py-4 rounded-2xl text-lg hover:bg-white/10 transition" id="nav-restock">
+        <i class="fas fa-plus-circle w-5"></i> Restock / Add Item
       </a>
-      <a onclick="navigate('log')" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 text-cyan-300" id="nav-log">
-        <i class="fas fa-history"></i> Activity Log
+      <a onclick="navigate('log')" class="nav-item flex items-center gap-4 px-6 py-4 rounded-2xl text-lg hover:bg-white/10 transition" id="nav-log">
+        <i class="fas fa-history w-5"></i> Activity Log
       </a>
     </nav>
 
-    <div class="p-4 border-t border-cyan-500/30 text-xs text-cyan-400 flex items-center justify-between">
-      <div>Connected • Live</div>
-      <button onclick="resetData()" class="text-red-400 hover:text-red-300">Reset All Data</button>
+    <div class="p-6 text-xs text-cyan-400 border-t border-cyan-400/30">
+      <div class="flex justify-between items-center">
+        <span>✅ Fully Local • No Google Sheets</span>
+        <button onclick="resetData()" class="hover:text-red-400">Reset Data</button>
+      </div>
     </div>
   </div>
 
   <!-- Main Content -->
-  <div class="ml-64 p-8">
+  <div class="ml-72 p-10">
 
-    <!-- Dashboard -->
+    <!-- DASHBOARD -->
     <div id="page-dashboard">
-      <h1 class="text-4xl font-bold mb-2 neon-cyan">Welcome back, Will 👋</h1>
-      <p class="text-cyan-300">Space Options • Cedar Rapids Inventory</p>
+      <h1 class="text-5xl font-bold neon">Good morning, Will 👋</h1>
+      <p class="text-cyan-300 mt-2 text-xl">Here’s your closet shelving inventory at a glance.</p>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+      <div class="grid grid-cols-3 gap-6 mt-12">
         <div class="glass rounded-3xl p-8 border border-cyan-400/30">
-          <p class="text-cyan-300 text-sm">Total Products</p>
-          <div id="total-products" class="text-6xl font-bold text-white mt-2">0</div>
+          <p class="uppercase text-sm tracking-widest text-cyan-300">Total Products</p>
+          <div id="total-products" class="text-7xl font-bold mt-4">23</div>
         </div>
         <div class="glass rounded-3xl p-8 border border-amber-400/30">
-          <p class="text-amber-300 text-sm">Low Stock Items</p>
-          <div id="low-stock" class="text-6xl font-bold text-amber-400 mt-2">0</div>
+          <p class="uppercase text-sm tracking-widest text-amber-300">Low Stock</p>
+          <div id="low-stock" class="text-7xl font-bold mt-4 text-amber-400">3</div>
         </div>
         <div class="glass rounded-3xl p-8 border border-emerald-400/30">
-          <p class="text-emerald-300 text-sm">Estimated Inventory Value</p>
-          <div id="total-value" class="text-6xl font-bold text-emerald-400 mt-2">$0</div>
+          <p class="uppercase text-sm tracking-widest text-emerald-300">Total Value</p>
+          <div id="total-value" class="text-7xl font-bold mt-4 text-emerald-400">$2,847</div>
         </div>
       </div>
 
-      <h2 class="text-2xl font-semibold mt-12 mb-6">Low Stock Alerts</h2>
-      <div id="alerts" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      <h2 class="text-2xl font-semibold mt-16 mb-6">Low Stock Alerts</h2>
+      <div id="alerts" class="grid grid-cols-2 gap-6"></div>
     </div>
 
-    <!-- Inventory Page -->
+    <!-- INVENTORY PAGE -->
     <div id="page-inventory" class="hidden">
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Full Inventory</h1>
-        <input id="search" type="text" placeholder="Search products..." 
-               class="bg-slate-800 border border-cyan-400/30 rounded-2xl px-5 py-3 w-80 focus:outline-none focus:border-cyan-400">
-      </div>
+      <h1 class="text-4xl font-bold mb-8">Full Inventory</h1>
+      <input id="search" type="text" placeholder="🔎 Search inventory..." class="w-full max-w-md bg-white/10 border border-cyan-400/30 rounded-3xl px-6 py-4 mb-8 focus:outline-none">
       <table class="w-full glass rounded-3xl overflow-hidden">
-        <thead class="bg-slate-800/80">
-          <tr>
+        <thead>
+          <tr class="bg-white/10">
             <th class="text-left p-6">Product</th>
             <th class="text-left p-6">Category</th>
             <th class="text-center p-6">Quantity</th>
-            <th class="text-right p-6">Price</th>
-            <th class="w-28"></th>
+            <th class="text-right p-6">Unit Price</th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="inventory-body" class="text-sm"></tbody>
       </table>
     </div>
 
-    <!-- Restock / Add Item -->
-    <div id="page-restock" class="hidden max-w-2xl mx-auto">
-      <h1 class="text-3xl font-bold mb-8">Restock or Add New Item</h1>
-      <form id="add-form" class="glass rounded-3xl p-8 space-y-6">
-        <div>
-          <label class="block text-cyan-300 mb-2">Product Name</label>
-          <input id="name" type="text" required class="w-full bg-slate-900 border border-cyan-400/30 rounded-2xl px-5 py-4">
-        </div>
+    <!-- RESTOCK PAGE -->
+    <div id="page-restock" class="hidden max-w-xl mx-auto">
+      <h1 class="text-4xl font-bold mb-10">Add / Restock Item</h1>
+      <form id="add-form" class="glass rounded-3xl p-10 space-y-8">
+        <input id="name" type="text" placeholder="Product name" required class="w-full bg-white/10 border border-cyan-400/30 rounded-3xl px-6 py-5 text-lg">
         <div class="grid grid-cols-2 gap-6">
           <div>
-            <label class="block text-cyan-300 mb-2">Category</label>
-            <select id="category" class="w-full bg-slate-900 border border-cyan-400/30 rounded-2xl px-5 py-4">
+            <select id="category" class="w-full bg-white/10 border border-cyan-400/30 rounded-3xl px-6 py-5 text-lg">
               <option>Super Slide</option>
               <option>Shelf and Rod</option>
               <option>Wire</option>
             </select>
           </div>
           <div>
-            <label class="block text-cyan-300 mb-2">Quantity</label>
-            <input id="qty" type="number" value="1" min="1" class="w-full bg-slate-900 border border-cyan-400/30 rounded-2xl px-5 py-4">
+            <input id="qty" type="number" value="10" class="w-full bg-white/10 border border-cyan-400/30 rounded-3xl px-6 py-5 text-lg">
           </div>
         </div>
-        <div>
-          <label class="block text-cyan-300 mb-2">Unit Price ($)</label>
-          <input id="price" type="number" step="0.01" value="49.99" class="w-full bg-slate-900 border border-cyan-400/30 rounded-2xl px-5 py-4">
-        </div>
-        <button type="submit" 
-                class="w-full bg-cyan-400 hover:bg-cyan-300 transition text-slate-900 font-bold py-5 rounded-3xl text-lg flex items-center justify-center gap-3">
-          <i class="fas fa-plus"></i> Add to Inventory
+        <input id="price" type="number" step="0.01" value="49.99" placeholder="Unit price" class="w-full bg-white/10 border border-cyan-400/30 rounded-3xl px-6 py-5 text-lg">
+        <button type="submit" class="w-full bg-cyan-400 text-slate-900 font-bold text-xl py-6 rounded-3xl hover:bg-cyan-300 transition flex items-center justify-center gap-3">
+          <i class="fas fa-plus"></i> Add to Inventory Now
         </button>
       </form>
     </div>
 
-    <!-- Activity Log -->
+    <!-- ACTIVITY LOG -->
     <div id="page-log" class="hidden">
-      <h1 class="text-3xl font-bold mb-8">Activity Log</h1>
+      <h1 class="text-4xl font-bold mb-8">Activity Log</h1>
       <div id="log-list" class="space-y-4"></div>
     </div>
   </div>
 
   <script>
-    let inventory = JSON.parse(localStorage.getItem('inventory')) || [
-      { id: 1, name: "SuperSlide 48\" Wire Shelf", category: "Super Slide", qty: 12, price: 89.99 },
-      { id: 2, name: "SuperSlide 72\" Wire Shelf", category: "Super Slide", qty: 8, price: 119.99 },
-      { id: 3, name: "Shelf & Rod Kit 4ft", category: "Shelf and Rod", qty: 15, price: 45.00 },
-      { id: 4, name: "Shelf & Rod Kit 6ft", category: "Shelf and Rod", qty: 10, price: 65.00 },
-      { id: 5, name: "Wire Shelf 24\"", category: "Wire", qty: 25, price: 24.99 },
-      { id: 6, name: "Large Wire Basket", category: "Wire", qty: 18, price: 29.99 },
-      { id: 7, name: "SuperSlide 96\" Wire Shelf", category: "Super Slide", qty: 4, price: 149.99 }
+    let inventory = JSON.parse(localStorage.getItem('spaceOptionsInventory')) || [
+      {id:1, name:"SuperSlide 48\" Wire Shelf", category:"Super Slide", qty:12, price:89.99},
+      {id:2, name:"SuperSlide 72\" Wire Shelf", category:"Super Slide", qty:8, price:119.99},
+      {id:3, name:"Shelf & Rod Kit 4ft", category:"Shelf and Rod", qty:15, price:45},
+      {id:4, name:"Shelf & Rod Kit 6ft", category:"Shelf and Rod", qty:10, price:65},
+      {id:5, name:"Heavy Duty Wire Shelf 24\"", category:"Wire", qty:25, price:24.99}
     ];
 
-    let activityLog = JSON.parse(localStorage.getItem('activityLog')) || [];
+    let activityLog = JSON.parse(localStorage.getItem('spaceOptionsLog')) || [];
 
     function saveData() {
-      localStorage.setItem('inventory', JSON.stringify(inventory));
-      localStorage.setItem('activityLog', JSON.stringify(activityLog));
+      localStorage.setItem('spaceOptionsInventory', JSON.stringify(inventory));
+      localStorage.setItem('spaceOptionsLog', JSON.stringify(activityLog));
     }
 
-    function addActivity(action) {
-      activityLog.unshift({
-        time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
-        action: action
-      });
-      if (activityLog.length > 20) activityLog.pop();
+    function addActivity(text) {
+      activityLog.unshift({time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), text});
+      if (activityLog.length > 15) activityLog.pop();
       saveData();
     }
 
     function renderDashboard() {
-      const total = inventory.length;
+      document.getElementById('total-products').textContent = inventory.length;
       const low = inventory.filter(i => i.qty < 5).length;
-      const value = inventory.reduce((sum, i) => sum + (i.qty * i.price), 0);
-
-      document.getElementById('total-products').textContent = total;
       document.getElementById('low-stock').textContent = low;
-      document.getElementById('total-value').textContent = '$' + value.toFixed(0);
+      const value = inventory.reduce((a, i) => a + i.qty * i.price, 0);
+      document.getElementById('total-value').textContent = '$' + Math.round(value);
 
-      // Low stock alerts
-      const alertsDiv = document.getElementById('alerts');
-      alertsDiv.innerHTML = '';
+      const alerts = document.getElementById('alerts');
+      alerts.innerHTML = '';
       inventory.filter(i => i.qty < 5).forEach(item => {
-        alertsDiv.innerHTML += `
-          <div class="glass border border-amber-400/50 rounded-2xl p-6 flex justify-between items-center">
-            <div>
-              <p class="font-semibold">${item.name}</p>
-              <p class="text-amber-400 text-sm">Only ${item.qty} left</p>
-            </div>
-            <div class="text-4xl">⚠️</div>
-          </div>`;
+        alerts.innerHTML += `<div class="glass border border-amber-400 rounded-3xl p-6 flex justify-between"><div><p class="font-semibold">${item.name}</p><p class="text-amber-400">Only ${item.qty} left</p></div><div class="text-5xl">⚠️</div></div>`;
       });
-      if (alertsDiv.children.length === 0) {
-        alertsDiv.innerHTML = `<p class="text-cyan-300 italic">No low stock items — great job managing inventory!</p>`;
-      }
+      if (alerts.children.length === 0) alerts.innerHTML = `<p class="text-cyan-300">All stock levels are healthy ✅</p>`;
     }
 
     function renderInventory(filter = '') {
       const tbody = document.getElementById('inventory-body');
       tbody.innerHTML = '';
-      const filtered = inventory.filter(i => 
-        i.name.toLowerCase().includes(filter.toLowerCase())
-      );
-
-      filtered.forEach(item => {
-        const row = document.createElement('tr');
-        row.className = 'border-b border-cyan-400/10 hover:bg-cyan-400/10 transition';
-        row.innerHTML = `
+      inventory.filter(i => i.name.toLowerCase().includes(filter.toLowerCase())).forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-white/10 hover:bg-white/5';
+        tr.innerHTML = `
           <td class="p-6 font-medium">${item.name}</td>
           <td class="p-6 text-cyan-300">${item.category}</td>
-          <td class="p-6 text-center ${item.qty < 5 ? 'text-amber-400 font-bold' : ''}">${item.qty}</td>
-          <td class="p-6 text-right">$${(item.price).toFixed(2)}</td>
-          <td class="p-6">
-            <button onclick="deleteItem(${item.id})" class="text-red-400 hover:text-red-500">
-              <i class="fas fa-trash"></i>
-            </button>
-          </td>`;
-        tbody.appendChild(row);
+          <td class="p-6 text-center font-bold ${item.qty < 5 ? 'text-amber-400' : ''}">${item.qty}</td>
+          <td class="p-6 text-right">$${item.price}</td>
+          <td class="p-6"><button onclick="deleteItem(${item.id})" class="text-red-400"><i class="fas fa-trash"></i></button></td>`;
+        tbody.appendChild(tr);
       });
     }
 
@@ -224,30 +189,24 @@
 
     function renderLog() {
       const container = document.getElementById('log-list');
-      container.innerHTML = '';
-      activityLog.forEach(entry => {
-        const div = document.createElement('div');
-        div.className = 'glass rounded-2xl p-5 flex justify-between items-center';
-        div.innerHTML = `<span class="font-mono text-xs text-cyan-400">${entry.time}</span><span>${entry.action}</span>`;
-        container.appendChild(div);
-      });
+      container.innerHTML = activityLog.map(entry => `
+        <div class="glass rounded-3xl p-6 flex justify-between items-center">
+          <span class="font-mono text-cyan-400">${entry.time}</span>
+          <span class="text-lg">${entry.text}</span>
+        </div>`).join('');
     }
 
     function navigate(page) {
-      document.querySelectorAll('[id^="page-"]').forEach(p => p.classList.add('hidden'));
+      document.querySelectorAll('div[id^="page-"]').forEach(p => p.classList.add('hidden'));
       document.getElementById('page-' + page).classList.remove('hidden');
-
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active', 'bg-cyan-500/10'));
-      document.getElementById('nav-' + page).classList.add('active', 'bg-cyan-500/10');
-
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active', 'bg-white/10'));
+      document.getElementById('nav-' + page).classList.add('active', 'bg-white/10');
       if (page === 'inventory') renderInventory();
       if (page === 'log') renderLog();
     }
 
-    // Form submit
     document.getElementById('add-form').addEventListener('submit', function(e) {
       e.preventDefault();
-      
       const newItem = {
         id: Date.now(),
         name: document.getElementById('name').value,
@@ -255,37 +214,26 @@
         qty: parseInt(document.getElementById('qty').value),
         price: parseFloat(document.getElementById('price').value)
       };
-
       inventory.push(newItem);
       saveData();
       renderDashboard();
       addActivity(`Added ${newItem.qty} × ${newItem.name}`);
-
-      // Confetti effect
-      alert('✅ Item added successfully! 🎉');
-
-      // Reset form
+      alert('✅ Item successfully added!');
       this.reset();
       navigate('inventory');
     });
 
     function resetData() {
-      if (confirm('Reset ALL inventory and logs?')) {
+      if (confirm('Clear ALL inventory and logs?')) {
         localStorage.clear();
         location.reload();
       }
     }
 
-    // Initialize
-    window.onload = function() {
+    window.onload = () => {
       renderDashboard();
-      renderInventory();
       navigate('dashboard');
-
-      // Live search
-      document.getElementById('search').addEventListener('input', (e) => {
-        renderInventory(e.target.value);
-      });
+      document.getElementById('search').addEventListener('input', e => renderInventory(e.target.value));
     };
   </script>
 </body>
