@@ -32,6 +32,9 @@
       <a onclick="navigate('inventory')" class="nav-item flex items-center gap-4 px-6 py-4 rounded-2xl text-lg hover:bg-white/10" id="nav-inventory">
         <i class="fas fa-boxes-stacked w-5"></i> Full Inventory
       </a>
+      <a onclick="navigate('order')" class="nav-item flex items-center gap-4 px-6 py-4 rounded-2xl text-lg hover:bg-white/10" id="nav-order">
+        <i class="fas fa-shopping-cart w-5"></i> New Order
+      </a>
       <a onclick="navigate('restock')" class="nav-item flex items-center gap-4 px-6 py-4 rounded-2xl text-lg hover:bg-white/10" id="nav-restock">
         <i class="fas fa-plus-circle w-5"></i> Restock / Add Item
       </a>
@@ -51,7 +54,7 @@
 
     <!-- DASHBOARD -->
     <div id="page-dashboard">
-      <h1 class="text-5xl font-bold neon">Good morning, Will 👋</h1>
+      <h1 class="text-5xl font-bold neon">Good morning, Kelly 👋</h1>
       <p class="text-cyan-300 text-xl mt-2">Real-time closet shelving inventory</p>
 
       <div class="grid grid-cols-3 gap-6 mt-12">
@@ -76,7 +79,7 @@
     <!-- INVENTORY -->
     <div id="page-inventory" class="hidden">
       <h1 class="text-4xl font-bold mb-8">Full Inventory</h1>
-      <input id="search" type="text" placeholder="🔎 Search products..." class="w-full max-w-md bg-white/10 border border-cyan-400/30 rounded-3xl px-6 py-4 mb-8 focus:outline-none">
+      <input id="search" type="text" placeholder="🔎 Search products..." class="w-full max-w-md bg-white/10 border border-cyan-400/30 rounded-3xl px-6 py-4 mb-8">
       <table class="w-full glass rounded-3xl overflow-hidden">
         <thead class="bg-white/10">
           <tr>
@@ -91,9 +94,28 @@
       </table>
     </div>
 
+    <!-- NEW ORDER PAGE -->
+    <div id="page-order" class="hidden max-w-2xl mx-auto">
+      <h1 class="text-4xl font-bold mb-8">New Customer Order</h1>
+      <div class="glass rounded-3xl p-8">
+        <div id="order-items" class="space-y-4 mb-8"></div>
+
+        <div class="flex gap-4 mb-8">
+          <select id="order-product" class="flex-1 bg-white/10 border border-cyan-400/30 rounded-3xl px-6 py-4 text-lg"></select>
+          <input id="order-qty" type="number" value="1" min="1" class="w-28 bg-white/10 border border-cyan-400/30 rounded-3xl px-6 py-4 text-lg text-center">
+          <button onclick="addToOrder()" class="bg-white/10 hover:bg-white/20 px-8 rounded-3xl text-lg">Add to Order</button>
+        </div>
+
+        <button onclick="submitOrder()" 
+                class="w-full bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-bold py-6 rounded-3xl text-xl flex items-center justify-center gap-3">
+          <i class="fas fa-check"></i> Submit Order & Update Inventory
+        </button>
+      </div>
+    </div>
+
     <!-- RESTOCK -->
     <div id="page-restock" class="hidden max-w-xl mx-auto">
-      <h1 class="text-4xl font-bold mb-10">Restock or Add New Item</h1>
+      <h1 class="text-4xl font-bold mb-10">Restock / Add New Item</h1>
       <form id="add-form" class="glass rounded-3xl p-10 space-y-8">
         <input id="name" type="text" placeholder="Product name" required class="w-full bg-white/10 border border-cyan-400/30 rounded-3xl px-6 py-5 text-lg">
         <div class="grid grid-cols-2 gap-6">
@@ -130,8 +152,12 @@
     ];
 
     let activityLog = JSON.parse(localStorage.getItem('spaceOptionsLog')) || [];
+    let currentOrder = [];
 
-    function saveData() { localStorage.setItem('spaceOptionsInventory', JSON.stringify(inventory)); localStorage.setItem('spaceOptionsLog', JSON.stringify(activityLog)); }
+    function saveData() {
+      localStorage.setItem('spaceOptionsInventory', JSON.stringify(inventory));
+      localStorage.setItem('spaceOptionsLog', JSON.stringify(activityLog));
+    }
 
     function addActivity(text) {
       activityLog.unshift({time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), text});
@@ -191,15 +217,80 @@
         </div>`).join('');
     }
 
+    // New Order Functions
+    function populateOrderDropdown() {
+      const select = document.getElementById('order-product');
+      select.innerHTML = inventory.map(item => `<option value="${item.id}">${item.name} (${item.qty} left)</option>`).join('');
+    }
+
+    function addToOrder() {
+      const productId = parseInt(document.getElementById('order-product').value);
+      const qty = parseInt(document.getElementById('order-qty').value);
+      const product = inventory.find(i => i.id === productId);
+
+      if (!product || qty > product.qty) {
+        alert("Not enough stock!");
+        return;
+      }
+
+      currentOrder.push({id: product.id, name: product.name, qty: qty, price: product.price});
+      renderCurrentOrder();
+    }
+
+    function renderCurrentOrder() {
+      const container = document.getElementById('order-items');
+      container.innerHTML = currentOrder.map((item, index) => `
+        <div class="flex justify-between items-center bg-white/10 p-4 rounded-2xl">
+          <span>${item.name} × ${item.qty}</span>
+          <span class="text-emerald-400">$${(item.qty * item.price).toFixed(2)}</span>
+          <button onclick="removeFromOrder(${index})" class="text-red-400"><i class="fas fa-trash"></i></button>
+        </div>`).join('');
+    }
+
+    function removeFromOrder(index) {
+      currentOrder.splice(index, 1);
+      renderCurrentOrder();
+    }
+
+    function submitOrder() {
+      if (currentOrder.length === 0) {
+        alert("Order is empty!");
+        return;
+      }
+
+      let orderSummary = "Order placed: ";
+      currentOrder.forEach(item => {
+        const product = inventory.find(p => p.id === item.id);
+        if (product) product.qty -= item.qty;
+        orderSummary += `${item.qty}× ${item.name} `;
+      });
+
+      addActivity(orderSummary);
+      saveData();
+      renderDashboard();
+      renderInventory();
+
+      alert("✅ Order submitted successfully!\nInventory has been updated.");
+      currentOrder = [];
+      renderCurrentOrder();
+      navigate('dashboard');
+    }
+
     function navigate(page) {
       document.querySelectorAll('div[id^="page-"]').forEach(p => p.classList.add('hidden'));
       document.getElementById('page-' + page).classList.remove('hidden');
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active', 'bg-white/10'));
       document.getElementById('nav-' + page).classList.add('active', 'bg-white/10');
+
       if (page === 'inventory') renderInventory();
       if (page === 'log') renderLog();
+      if (page === 'order') {
+        populateOrderDropdown();
+        renderCurrentOrder();
+      }
     }
 
+    // Restock form
     document.getElementById('add-form').addEventListener('submit', function(e) {
       e.preventDefault();
       const newItem = {
@@ -213,7 +304,7 @@
       inventory.push(newItem);
       saveData();
       renderDashboard();
-      addActivity(`Added ${newItem.qty} × ${newItem.name}`);
+      addActivity(`Restocked ${newItem.qty} × ${newItem.name}`);
       alert('✅ Item added successfully!');
       this.reset();
       navigate('inventory');
