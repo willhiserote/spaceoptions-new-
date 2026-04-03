@@ -1,4 +1,3 @@
-       
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,340 +5,287 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Space Options • Cedar Rapids</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-    body { font-family: 'Inter', sans-serif; }
-    .space-gradient { background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%); }
-    .card { transition: all 0.3s ease; }
-    .card:hover { transform: translateY(-4px); }
+    body { background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%); }
+    .glass { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(16px); }
+    .neon-cyan { text-shadow: 0 0 15px #22d3ee; }
+    .star-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-200">
-  <div class="flex h-screen overflow-hidden">
-    <!-- Sidebar -->
-    <div class="w-72 space-gradient p-8 flex flex-col border-r border-white/10">
-      <div class="flex items-center gap-4 mb-10">
-        <i class="fa-solid fa-cube text-cyan-400 text-4xl"></i>
-        <div>
-          <h1 class="text-3xl font-bold tracking-tight">Space Options</h1>
-          <p class="text-cyan-300 text-sm">Cedar Rapids, IA</p>
-        </div>
-      </div>
+<body class="min-h-screen text-white font-sans">
 
-      <nav class="flex-1 space-y-2">
-        <button onclick="showView('dashboard')" class="nav-btn w-full text-left flex items-center gap-3 px-6 py-4 rounded-2xl hover:bg-white/10 text-lg font-medium">
-          <i class="fa-solid fa-house"></i> Dashboard
-        </button>
-        <button onclick="showView('inventory')" class="nav-btn w-full text-left flex items-center gap-3 px-6 py-4 rounded-2xl hover:bg-white/10 text-lg font-medium">
-          <i class="fa-solid fa-boxes-stacked"></i> Inventory
-        </button>
-        <button onclick="showView('restock')" class="nav-btn w-full text-left flex items-center gap-3 px-6 py-4 rounded-2xl hover:bg-white/10 text-lg font-medium">
-          <i class="fa-solid fa-plus-circle"></i> Restock / Add Item
-        </button>
-        <button onclick="showView('log')" class="nav-btn w-full text-left flex items-center gap-3 px-6 py-4 rounded-2xl hover:bg-white/10 text-lg font-medium">
-          <i class="fa-solid fa-clock-rotate-left"></i> Activity Log
-        </button>
-      </nav>
-
-      <div class="pt-8 border-t border-white/10 text-xs text-slate-400">
-        Connected to Google Sheet • Live Updates<br>
-        Space Options Closet Shelving
+  <!-- Sidebar -->
+  <div class="fixed inset-y-0 left-0 w-64 glass border-r border-cyan-500/30 flex flex-col">
+    <div class="p-6 flex items-center gap-3 border-b border-cyan-500/30">
+      <div class="w-10 h-10 bg-cyan-400 rounded-2xl flex items-center justify-center text-slate-900 text-2xl shadow-lg shadow-cyan-500/50">📦</div>
+      <div>
+        <h1 class="text-2xl font-bold tracking-tighter neon-cyan">Space Options</h1>
+        <p class="text-xs text-cyan-300">Cedar Rapids, IA</p>
       </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col overflow-hidden">
-      <header class="bg-white/5 border-b border-white/10 px-10 py-6 flex justify-between items-center">
-        <h2 id="pageTitle" class="text-3xl font-semibold">Dashboard</h2>
-        <button onclick="refreshAll()" 
-                class="px-6 py-3 bg-cyan-500 hover:bg-cyan-600 rounded-2xl flex items-center gap-3 font-medium transition-colors">
-          <i class="fa-solid fa-rotate"></i>
-          Refresh Live Data
-        </button>
-      </header>
+    <nav class="flex-1 p-4">
+      <a onclick="navigate('dashboard')" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 text-cyan-300 mb-1 active" id="nav-dashboard">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </a>
+      <a onclick="navigate('inventory')" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 text-cyan-300 mb-1" id="nav-inventory">
+        <i class="fas fa-boxes-stacked"></i> Full Inventory
+      </a>
+      <a onclick="navigate('restock')" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 text-cyan-300 mb-1" id="nav-restock">
+        <i class="fas fa-plus-circle"></i> Restock / Add Item
+      </a>
+      <a onclick="navigate('log')" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-cyan-500/10 text-cyan-300" id="nav-log">
+        <i class="fas fa-history"></i> Activity Log
+      </a>
+    </nav>
 
-      <div class="flex-1 overflow-auto p-10" id="mainContent">
-        <!-- Content loaded by JavaScript -->
+    <div class="p-4 border-t border-cyan-500/30 text-xs text-cyan-400 flex items-center justify-between">
+      <div>Connected • Live</div>
+      <button onclick="resetData()" class="text-red-400 hover:text-red-300">Reset All Data</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="ml-64 p-8">
+
+    <!-- Dashboard -->
+    <div id="page-dashboard">
+      <h1 class="text-4xl font-bold mb-2 neon-cyan">Welcome back, Will 👋</h1>
+      <p class="text-cyan-300">Space Options • Cedar Rapids Inventory</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+        <div class="glass rounded-3xl p-8 border border-cyan-400/30">
+          <p class="text-cyan-300 text-sm">Total Products</p>
+          <div id="total-products" class="text-6xl font-bold text-white mt-2">0</div>
+        </div>
+        <div class="glass rounded-3xl p-8 border border-amber-400/30">
+          <p class="text-amber-300 text-sm">Low Stock Items</p>
+          <div id="low-stock" class="text-6xl font-bold text-amber-400 mt-2">0</div>
+        </div>
+        <div class="glass rounded-3xl p-8 border border-emerald-400/30">
+          <p class="text-emerald-300 text-sm">Estimated Inventory Value</p>
+          <div id="total-value" class="text-6xl font-bold text-emerald-400 mt-2">$0</div>
+        </div>
       </div>
+
+      <h2 class="text-2xl font-semibold mt-12 mb-6">Low Stock Alerts</h2>
+      <div id="alerts" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </div>
+
+    <!-- Inventory Page -->
+    <div id="page-inventory" class="hidden">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">Full Inventory</h1>
+        <input id="search" type="text" placeholder="Search products..." 
+               class="bg-slate-800 border border-cyan-400/30 rounded-2xl px-5 py-3 w-80 focus:outline-none focus:border-cyan-400">
+      </div>
+      <table class="w-full glass rounded-3xl overflow-hidden">
+        <thead class="bg-slate-800/80">
+          <tr>
+            <th class="text-left p-6">Product</th>
+            <th class="text-left p-6">Category</th>
+            <th class="text-center p-6">Quantity</th>
+            <th class="text-right p-6">Price</th>
+            <th class="w-28"></th>
+          </tr>
+        </thead>
+        <tbody id="inventory-body" class="text-sm"></tbody>
+      </table>
+    </div>
+
+    <!-- Restock / Add Item -->
+    <div id="page-restock" class="hidden max-w-2xl mx-auto">
+      <h1 class="text-3xl font-bold mb-8">Restock or Add New Item</h1>
+      <form id="add-form" class="glass rounded-3xl p-8 space-y-6">
+        <div>
+          <label class="block text-cyan-300 mb-2">Product Name</label>
+          <input id="name" type="text" required class="w-full bg-slate-900 border border-cyan-400/30 rounded-2xl px-5 py-4">
+        </div>
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <label class="block text-cyan-300 mb-2">Category</label>
+            <select id="category" class="w-full bg-slate-900 border border-cyan-400/30 rounded-2xl px-5 py-4">
+              <option>Super Slide</option>
+              <option>Shelf and Rod</option>
+              <option>Wire</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-cyan-300 mb-2">Quantity</label>
+            <input id="qty" type="number" value="1" min="1" class="w-full bg-slate-900 border border-cyan-400/30 rounded-2xl px-5 py-4">
+          </div>
+        </div>
+        <div>
+          <label class="block text-cyan-300 mb-2">Unit Price ($)</label>
+          <input id="price" type="number" step="0.01" value="49.99" class="w-full bg-slate-900 border border-cyan-400/30 rounded-2xl px-5 py-4">
+        </div>
+        <button type="submit" 
+                class="w-full bg-cyan-400 hover:bg-cyan-300 transition text-slate-900 font-bold py-5 rounded-3xl text-lg flex items-center justify-center gap-3">
+          <i class="fas fa-plus"></i> Add to Inventory
+        </button>
+      </form>
+    </div>
+
+    <!-- Activity Log -->
+    <div id="page-log" class="hidden">
+      <h1 class="text-3xl font-bold mb-8">Activity Log</h1>
+      <div id="log-list" class="space-y-4"></div>
     </div>
   </div>
 
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby6_Z3xN-b1Po6jiC2GPTpq-0MRTljSHveEltzsjjMLEd-K3ATu0cTFOue2GRuYoa2qkg/exec";
-    const SECRET_KEY = "spaceoptions2026";
+    let inventory = JSON.parse(localStorage.getItem('inventory')) || [
+      { id: 1, name: "SuperSlide 48\" Wire Shelf", category: "Super Slide", qty: 12, price: 89.99 },
+      { id: 2, name: "SuperSlide 72\" Wire Shelf", category: "Super Slide", qty: 8, price: 119.99 },
+      { id: 3, name: "Shelf & Rod Kit 4ft", category: "Shelf and Rod", qty: 15, price: 45.00 },
+      { id: 4, name: "Shelf & Rod Kit 6ft", category: "Shelf and Rod", qty: 10, price: 65.00 },
+      { id: 5, name: "Wire Shelf 24\"", category: "Wire", qty: 25, price: 24.99 },
+      { id: 6, name: "Large Wire Basket", category: "Wire", qty: 18, price: 29.99 },
+      { id: 7, name: "SuperSlide 96\" Wire Shelf", category: "Super Slide", qty: 4, price: 149.99 }
+    ];
 
-    let inventoryData = [];
+    let activityLog = JSON.parse(localStorage.getItem('activityLog')) || [];
 
-    async function fetchData(action) {
-      try {
-        const res = await fetch(`${WEB_APP_URL}?action=${action}`);
-        if (!res.ok) throw new Error("Failed to fetch");
-        return await res.json();
-      } catch (e) {
-        console.error(e);
-        alert("⚠️ Could not connect to Google Sheet. Please check the web app deployment.");
-        return [];
+    function saveData() {
+      localStorage.setItem('inventory', JSON.stringify(inventory));
+      localStorage.setItem('activityLog', JSON.stringify(activityLog));
+    }
+
+    function addActivity(action) {
+      activityLog.unshift({
+        time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+        action: action
+      });
+      if (activityLog.length > 20) activityLog.pop();
+      saveData();
+    }
+
+    function renderDashboard() {
+      const total = inventory.length;
+      const low = inventory.filter(i => i.qty < 5).length;
+      const value = inventory.reduce((sum, i) => sum + (i.qty * i.price), 0);
+
+      document.getElementById('total-products').textContent = total;
+      document.getElementById('low-stock').textContent = low;
+      document.getElementById('total-value').textContent = '$' + value.toFixed(0);
+
+      // Low stock alerts
+      const alertsDiv = document.getElementById('alerts');
+      alertsDiv.innerHTML = '';
+      inventory.filter(i => i.qty < 5).forEach(item => {
+        alertsDiv.innerHTML += `
+          <div class="glass border border-amber-400/50 rounded-2xl p-6 flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${item.name}</p>
+              <p class="text-amber-400 text-sm">Only ${item.qty} left</p>
+            </div>
+            <div class="text-4xl">⚠️</div>
+          </div>`;
+      });
+      if (alertsDiv.children.length === 0) {
+        alertsDiv.innerHTML = `<p class="text-cyan-300 italic">No low stock items — great job managing inventory!</p>`;
       }
     }
 
-    async function postData(payload) {
-      payload.secret = SECRET_KEY;
-      try {
-        const res = await fetch(WEB_APP_URL, {
-          method: "POST",
-          body: JSON.stringify(payload),
-          headers: { "Content-Type": "application/json" }
-        });
-        return await res.json();
-      } catch (e) {
-        alert("Error saving data. Please try again.");
-        return { success: false };
+    function renderInventory(filter = '') {
+      const tbody = document.getElementById('inventory-body');
+      tbody.innerHTML = '';
+      const filtered = inventory.filter(i => 
+        i.name.toLowerCase().includes(filter.toLowerCase())
+      );
+
+      filtered.forEach(item => {
+        const row = document.createElement('tr');
+        row.className = 'border-b border-cyan-400/10 hover:bg-cyan-400/10 transition';
+        row.innerHTML = `
+          <td class="p-6 font-medium">${item.name}</td>
+          <td class="p-6 text-cyan-300">${item.category}</td>
+          <td class="p-6 text-center ${item.qty < 5 ? 'text-amber-400 font-bold' : ''}">${item.qty}</td>
+          <td class="p-6 text-right">$${(item.price).toFixed(2)}</td>
+          <td class="p-6">
+            <button onclick="deleteItem(${item.id})" class="text-red-400 hover:text-red-500">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    function deleteItem(id) {
+      if (confirm('Delete this item?')) {
+        inventory = inventory.filter(i => i.id !== id);
+        saveData();
+        renderInventory(document.getElementById('search').value);
+        renderDashboard();
+        addActivity(`Deleted item #${id}`);
       }
     }
 
-    async function loadInventory() {
-      inventoryData = await fetchData("getInventory");
+    function renderLog() {
+      const container = document.getElementById('log-list');
+      container.innerHTML = '';
+      activityLog.forEach(entry => {
+        const div = document.createElement('div');
+        div.className = 'glass rounded-2xl p-5 flex justify-between items-center';
+        div.innerHTML = `<span class="font-mono text-xs text-cyan-400">${entry.time}</span><span>${entry.action}</span>`;
+        container.appendChild(div);
+      });
     }
 
-    async function loadLog() {
-      return await fetchData("getLog");
+    function navigate(page) {
+      document.querySelectorAll('[id^="page-"]').forEach(p => p.classList.add('hidden'));
+      document.getElementById('page-' + page).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active', 'bg-cyan-500/10'));
+      document.getElementById('nav-' + page).classList.add('active', 'bg-cyan-500/10');
+
+      if (page === 'inventory') renderInventory();
+      if (page === 'log') renderLog();
     }
 
-    async function refreshAll() {
-      await loadInventory();
-      renderCurrentView();
-      alert("✅ Live data refreshed from your Google Sheet!");
-    }
-
-    function showView(view) {
-      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-white/10'));
-      document.querySelector(`button[onclick="showView('${view}')"]`).classList.add('bg-white/10');
+    // Form submit
+    document.getElementById('add-form').addEventListener('submit', function(e) {
+      e.preventDefault();
       
-      const titles = {
-        dashboard: "Dashboard",
-        inventory: "Full Inventory",
-        restock: "Restock / Add New Item",
-        log: "Activity Log"
-      };
-      document.getElementById("pageTitle").textContent = titles[view];
-      renderView(view);
-    }
-
-    async function renderCurrentView() {
-      const title = document.getElementById("pageTitle").textContent;
-      let view = "dashboard";
-      if (title === "Full Inventory") view = "inventory";
-      else if (title === "Restock / Add New Item") view = "restock";
-      else if (title === "Activity Log") view = "log";
-      renderView(view);
-    }
-
-    async function renderView(view) {
-      const content = document.getElementById("mainContent");
-      
-      if (view === "dashboard") {
-        await loadInventory();
-        const lowStock = inventoryData.filter(i => (i["Current Stock"] || 0) <= (i["Reorder Level"] || 999));
-        const totalValue = inventoryData.reduce((sum, i) => sum + ((i["Current Stock"] || 0) * (i["Price"] || 0)), 0);
-
-        content.innerHTML = `
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="bg-white/5 rounded-3xl p-8 card">
-              <p class="text-cyan-400 text-sm">Total Products</p>
-              <p class="text-6xl font-bold mt-3">${inventoryData.length}</p>
-            </div>
-            <div class="bg-white/5 rounded-3xl p-8 card">
-              <p class="text-amber-400 text-sm">Low Stock Items</p>
-              <p class="text-6xl font-bold mt-3">${lowStock.length}</p>
-            </div>
-            <div class="bg-white/5 rounded-3xl p-8 card">
-              <p class="text-emerald-400 text-sm">Estimated Inventory Value</p>
-              <p class="text-6xl font-bold mt-3">$${totalValue.toFixed(0)}</p>
-            </div>
-          </div>
-
-          <h3 class="text-xl font-semibold mb-4">Low Stock Alerts</h3>
-          <div class="bg-white/5 rounded-3xl p-6">
-            ${lowStock.length ? lowStock.map(item => `
-              <div class="flex justify-between py-4 border-b border-white/10 last:border-none">
-                <span>${item["Product Name"] || "Unnamed Item"}</span>
-                <span class="text-amber-400 font-medium">${item["Current Stock"]} left (reorder at ${item["Reorder Level"]})</span>
-              </div>
-            `).join('') : '<p class="text-slate-400 py-8 text-center">No low stock items — great job managing inventory!</p>'}
-          </div>
-        `;
-      } 
-      else if (view === "inventory") {
-        await loadInventory();
-        let html = `
-          <input id="searchInput" placeholder="Search products..." 
-                 class="w-full mb-8 bg-white/10 border border-white/20 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-cyan-400">
-          <div class="overflow-x-auto">
-            <table class="w-full min-w-full">
-              <thead>
-                <tr class="border-b border-white/20 text-cyan-300 text-left">
-                  <th class="py-5 px-4">Item ID</th>
-                  <th class="py-5 px-4">Product Name</th>
-                  <th class="py-5 px-4">Category</th>
-                  <th class="py-5 px-4 text-right">Stock</th>
-                  <th class="py-5 px-4 text-right">Price</th>
-                  <th class="py-5 px-4 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="inventoryTable"></tbody>
-            </table>
-          </div>
-        `;
-        content.innerHTML = html;
-
-        const tbody = document.getElementById("inventoryTable");
-        inventoryData.forEach(item => {
-          const stock = item["Current Stock"] || 0;
-          const reorder = item["Reorder Level"] || 999;
-          const isLow = stock <= reorder;
-          
-          const row = document.createElement("tr");
-          row.className = `border-b border-white/10 hover:bg-white/5 ${isLow ? 'bg-amber-950/30' : ''}`;
-          row.innerHTML = `
-            <td class="py-5 px-4 font-mono">${item["Item ID"] || ''}</td>
-            <td class="py-5 px-4">${item["Product Name"] || ''}</td>
-            <td class="py-5 px-4">${item["Category"] || ''}</td>
-            <td class="py-5 px-4 text-right ${isLow ? 'text-amber-400 font-bold' : ''}">${stock}</td>
-            <td class="py-5 px-4 text-right">$${(item["Price"] || 0).toFixed(2)}</td>
-            <td class="py-5 px-4 text-center">
-              <button onclick="adjustStock('${item["Item ID"]}')" 
-                      class="text-cyan-400 hover:text-cyan-300 font-medium">Adjust Stock</button>
-            </td>
-          `;
-          tbody.appendChild(row);
-        });
-
-        // Simple search
-        document.getElementById("searchInput").addEventListener("input", function() {
-          const term = this.value.toLowerCase();
-          const rows = tbody.getElementsByTagName("tr");
-          for (let row of rows) {
-            row.style.display = row.textContent.toLowerCase().includes(term) ? "" : "none";
-          }
-        });
-      } 
-      else if (view === "restock") {
-        await loadInventory();
-        let options = inventoryData.map(i => 
-          `<option value="${i["Item ID"]}">${i["Product Name"]} (Current: ${i["Current Stock"] || 0})</option>`
-        ).join('');
-
-        content.innerHTML = `
-          <div class="max-w-2xl mx-auto bg-white/5 rounded-3xl p-10">
-            <h3 class="text-2xl mb-8">Restock Existing Item</h3>
-            <select id="restockItem" class="w-full bg-white/10 border border-white/20 rounded-2xl px-6 py-5 mb-6 text-lg">${options}</select>
-            <input id="restockQty" type="number" placeholder="Quantity to add" class="w-full bg-white/10 border border-white/20 rounded-2xl px-6 py-5 mb-6 text-lg">
-            <textarea id="restockNotes" placeholder="Notes (optional)" class="w-full bg-white/10 border border-white/20 rounded-2xl px-6 py-5 h-32 mb-8"></textarea>
-            <button onclick="performRestock()" 
-                    class="w-full bg-emerald-600 hover:bg-emerald-700 py-6 rounded-2xl text-xl font-semibold">✅ RESTOCK ITEM</button>
-
-            <div class="my-12 border-t border-white/10"></div>
-
-            <h3 class="text-2xl mb-8">Add Brand New Product</h3>
-            <div class="grid grid-cols-2 gap-6">
-              <input id="newId" placeholder="Item ID (e.g. SO-004)" class="bg-white/10 border border-white/20 rounded-2xl px-6 py-5">
-              <input id="newName" placeholder="Product Name" class="bg-white/10 border border-white/20 rounded-2xl px-6 py-5">
-              <input id="newCategory" placeholder="Category (Shelving, Rods, etc.)" class="bg-white/10 border border-white/20 rounded-2xl px-6 py-5">
-              <input id="newStock" type="number" placeholder="Starting Stock" class="bg-white/10 border border-white/20 rounded-2xl px-6 py-5">
-            </div>
-            <button onclick="addNewItem()" class="mt-8 w-full bg-cyan-500 hover:bg-cyan-600 py-6 rounded-2xl text-xl font-semibold">Add New Item to Inventory</button>
-          </div>
-        `;
-      } 
-      else if (view === "log") {
-        const logs = await loadLog();
-        let html = `<div class="space-y-6">`;
-        logs.forEach(log => {
-          const date = new Date(log.Timestamp);
-          html += `
-            <div class="bg-white/5 rounded-3xl p-8 flex justify-between items-start">
-              <div>
-                <div class="text-xs text-slate-400">${date.toLocaleString()}</div>
-                <div class="text-lg font-medium mt-1">${log["Action Type"]}</div>
-                <div class="text-slate-300">${log["Product Name"] || "New Item"}</div>
-              </div>
-              <div class="text-right">
-                <div class="text-2xl font-mono ${log["Quantity Change"] > 0 ? 'text-emerald-400' : 'text-rose-400'}">
-                  ${log["Quantity Change"] > 0 ? '+' : ''}${log["Quantity Change"]}
-                </div>
-                <div class="text-sm text-slate-400">New stock: ${log["New Stock Level"]}</div>
-              </div>
-            </div>`;
-        });
-        html += `</div>`;
-        content.innerHTML = html || '<p class="text-slate-400 text-center py-20">No activity logged yet.</p>';
-      }
-    }
-
-    async function performRestock() {
-      const itemId = document.getElementById("restockItem").value;
-      const quantity = parseFloat(document.getElementById("restockQty").value);
-      const notes = document.getElementById("restockNotes").value || "";
-
-      if (!itemId || !quantity || quantity <= 0) {
-        alert("Please select an item and enter a valid quantity.");
-        return;
-      }
-
-      const res = await postData({ action: "restock", itemId, quantity, notes });
-      if (res.success) {
-        alert("✅ Restock successful! Inventory updated.");
-        await loadInventory();
-        showView("inventory");
-      } else {
-        alert("Failed to restock. Please try again.");
-      }
-    }
-
-    async function adjustStock(itemId) {
-      const newStockStr = prompt("Enter the new stock level for this item:");
-      if (newStockStr === null) return;
-      const newStock = parseFloat(newStockStr);
-      if (isNaN(newStock)) return alert("Please enter a valid number.");
-
-      const res = await postData({ action: "adjustStock", itemId, quantity: newStock });
-      if (res.success) {
-        alert("✅ Stock adjusted successfully!");
-        await loadInventory();
-        showView("inventory");
-      }
-    }
-
-    async function addNewItem() {
-      const payload = {
-        action: "addNewItem",
-        itemId: document.getElementById("newId").value.trim(),
-        productName: document.getElementById("newName").value.trim(),
-        category: document.getElementById("newCategory").value.trim(),
-        currentStock: parseFloat(document.getElementById("newStock").value) || 0,
-        unit: "units",
-        reorderLevel: 5,
-        price: 49.99,
-        description: ""
+      const newItem = {
+        id: Date.now(),
+        name: document.getElementById('name').value,
+        category: document.getElementById('category').value,
+        qty: parseInt(document.getElementById('qty').value),
+        price: parseFloat(document.getElementById('price').value)
       };
 
-      if (!payload.itemId || !payload.productName) {
-        alert("Item ID and Product Name are required.");
-        return;
-      }
+      inventory.push(newItem);
+      saveData();
+      renderDashboard();
+      addActivity(`Added ${newItem.qty} × ${newItem.name}`);
 
-      const res = await postData(payload);
-      if (res.success) {
-        alert("✅ New item added successfully!");
-        await loadInventory();
-        showView("inventory");
+      // Confetti effect
+      alert('✅ Item added successfully! 🎉');
+
+      // Reset form
+      this.reset();
+      navigate('inventory');
+    });
+
+    function resetData() {
+      if (confirm('Reset ALL inventory and logs?')) {
+        localStorage.clear();
+        location.reload();
       }
     }
 
-    // Start the app
-    window.onload = () => {
-      showView("dashboard");
+    // Initialize
+    window.onload = function() {
+      renderDashboard();
+      renderInventory();
+      navigate('dashboard');
+
+      // Live search
+      document.getElementById('search').addEventListener('input', (e) => {
+        renderInventory(e.target.value);
+      });
     };
   </script>
 </body>
