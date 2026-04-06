@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,102 +13,167 @@
            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); }
     .glass { background: rgba(255,255,255,0.75); backdrop-filter: blur(20px); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1); }
     .neon { color: #14b8a6; text-shadow: 0 0 15px rgba(20,184,166,0.4); }
-    .product-img { width: 56px; height: 56px; object-fit: cover; border-radius: 12px; }
     .nav-item:hover { transform: translateX(4px); transition: all 0.2s; }
   </style>
 </head>
+
 <body class="min-h-screen text-slate-800">
 
-  <!-- Sidebar -->
-  <div class="fixed inset-y-0 left-0 w-72 glass border-r border-teal-200 flex flex-col">
-    <div class="p-8 flex items-center gap-4 border-b border-teal-200">
-      <div class="w-12 h-12 bg-teal-500 text-white rounded-3xl flex items-center justify-center text-3xl shadow-lg">📦</div>
-      <div>
-        <h1 class="text-3xl font-bold tracking-tighter neon">Space Options</h1>
-        <p class="text-teal-600 text-sm">Cedar Rapids, IA</p>
-      </div>
-    </div>
-
-    <nav class="flex-1 p-6 space-y-2">
-      <a onclick="navigate('dashboard')" class="nav-item flex items-center gap-4 px-6 py-4 rounded-2xl text-lg hover:bg-teal-50 active" id="nav-dashboard">
-        <i class="fas fa-tachometer-alt w-5"></i> Dashboard
-      </a>
-      <a onclick="navigate('inventory')" class="nav-item flex items-center gap-4 px-6 py-4 rounded-2xl text-lg hover:bg-teal-50" id="nav-inventory">
-        <i class="fas fa-boxes-stacked w-5"></i> Full Inventory
-      </a>
-      <a onclick="navigate('order')" class="nav-item flex items-center gap-4 px-6 py-4 rounded-2xl text-lg hover:bg-teal-50" id="nav-order">
-        <i class="fas fa-shopping-cart w-5"></i> New Order
-      </a>
-      <a onclick="navigate('restock')" class="nav-item flex items-center gap-4 px-6 py-4 rounded-2xl text-lg hover:bg-teal-50" id="nav-restock">
-        <i class="fas fa-plus-circle w-5"></i> Restock / Add Item
-      </a>
-      <a onclick="navigate('log')" class="nav-item flex items-center gap-4 px-6 py-4 rounded-2xl text-lg hover:bg-teal-50" id="nav-log">
-        <i class="fas fa-history w-5"></i> Activity Log
-      </a>
-    </nav>
-
-    <div class="p-6 text-xs text-teal-600 border-t border-teal-200 flex justify-between items-center">
-      <span>✅ Fully Local • Live Updates</span>
-      <button onclick="resetData()" class="text-red-400 hover:text-red-500 text-sm">Reset Data</button>
+<!-- Sidebar -->
+<div class="fixed inset-y-0 left-0 w-72 glass border-r border-teal-200 flex flex-col">
+  <div class="p-8 flex items-center gap-4 border-b border-teal-200">
+    <div class="w-12 h-12 bg-teal-500 text-white rounded-3xl flex items-center justify-center text-3xl shadow-lg">📦</div>
+    <div>
+      <h1 class="text-3xl font-bold neon">Space Options</h1>
+      <p class="text-teal-600 text-sm">Cedar Rapids, IA</p>
     </div>
   </div>
 
-  <!-- Main Content -->
-  <div class="ml-72 p-10">
+  <nav class="flex-1 p-6 space-y-2">
+    <a onclick="navigate('dashboard')" class="nav-item flex gap-4 px-6 py-4 rounded-2xl hover:bg-teal-50">Dashboard</a>
+    <a onclick="navigate('inventory')" class="nav-item flex gap-4 px-6 py-4 rounded-2xl hover:bg-teal-50">Inventory</a>
+    <a onclick="navigate('order')" class="nav-item flex gap-4 px-6 py-4 rounded-2xl hover:bg-teal-50">New Order</a>
+  </nav>
 
-    <!-- DASHBOARD -->
-    <div id="page-dashboard">
-      <h1 class="text-5xl font-bold neon">Good morning, Kelly 👋</h1>
-      <p class="text-teal-600 text-xl mt-2">Here's what's happening with your inventory today</p>
+  <div class="p-6 text-xs text-teal-600 border-t border-teal-200 flex justify-between">
+    <span>Live System</span>
+    <button onclick="resetData()" class="text-red-400">Reset</button>
+  </div>
+</div>
 
-      <div class="grid grid-cols-3 gap-6 mt-12">
-        <div class="glass rounded-3xl p-8 border border-teal-200">
-          <p class="text-teal-600 text-sm font-medium">Total Products</p>
-          <div id="total-products" class="text-7xl font-bold mt-3 text-slate-800">0</div>
-        </div>
-        <div class="glass rounded-3xl p-8 border border-amber-300">
-          <p class="text-amber-600 text-sm font-medium">Low Stock Items</p>
-          <div id="low-stock" class="text-7xl font-bold mt-3 text-amber-600">0</div>
-        </div>
-        <div class="glass rounded-3xl p-8 border border-emerald-300">
-          <p class="text-emerald-600 text-sm font-medium">Inventory Value</p>
-          <div id="total-value" class="text-7xl font-bold mt-3 text-emerald-600">$0</div>
-        </div>
-      </div>
+<!-- Main -->
+<div class="ml-72 p-10">
 
-      <h2 class="text-2xl font-semibold mt-16 mb-6 text-slate-700">Low Stock Alerts</h2>
-      <div id="alerts" class="grid grid-cols-2 gap-6"></div>
+<!-- DASHBOARD -->
+<div id="page-dashboard">
+  <h1 class="text-4xl font-bold">Dashboard</h1>
+
+  <div class="grid grid-cols-3 gap-6 mt-10">
+    <div class="glass p-6 rounded-2xl">
+      <p>Total Products</p>
+      <div id="total-products" class="text-4xl font-bold">0</div>
     </div>
-
-    <!-- INVENTORY -->
-    <div id="page-inventory" class="hidden">
-      <h1 class="text-4xl font-bold mb-8 text-slate-800">Full Inventory</h1>
-      <input id="search" type="text" placeholder="🔎 Search products..." class="w-full max-w-md bg-white border border-teal-200 rounded-3xl px-6 py-4 mb-8 focus:outline-none focus:border-teal-400">
-      <table class="w-full glass rounded-3xl overflow-hidden">
-        <thead class="bg-white border-b border-teal-100">
-          <tr>
-            <th class="text-left p-6">Product</th>
-            <th class="text-left p-6">Category</th>
-            <th class="text-center p-6">Qty</th>
-            <th class="text-right p-6">Price</th>
-            <th class="w-12"></th>
-          </tr>
-        </thead>
-        <tbody id="inventory-body" class="text-sm"></tbody>
-      </table>
+    <div class="glass p-6 rounded-2xl">
+      <p>Low Stock</p>
+      <div id="low-stock" class="text-4xl font-bold text-amber-500">0</div>
     </div>
+    <div class="glass p-6 rounded-2xl">
+      <p>Total Value</p>
+      <div id="total-value" class="text-4xl font-bold text-green-500">$0</div>
+    </div>
+  </div>
 
-    <!-- NEW ORDER -->
-    <div id="page-order" class="hidden max-w-2xl mx-auto">
-      <h1 class="text-4xl font-bold mb-8 text-slate-800">New Customer Order</h1>
-      <div class="glass rounded-3xl p-8">
-        <div id="order-items" class="space-y-4 mb-8"></div>
+  <div id="alerts" class="mt-10 grid grid-cols-2 gap-4"></div>
+</div>
 
-        <div class="flex gap-4 mb-8">
-          <select id="order-product" class="flex-1 bg-white border border-teal-200 rounded-3xl px-6 py-4 text-lg"></select>
-          <input id="order-qty" type="number" value="1" min="1" class="w-28 bg-white border border-teal-200 rounded-3xl px-6 py-4 text-lg text-center">
-          <button onclick="addToOrder()" class="bg-teal-500 hover:bg-teal-600 text-white px-8 rounded-3xl text-lg font-medium">Add</button>
-        </div>
+<!-- INVENTORY -->
+<div id="page-inventory" class="hidden">
+  <h1 class="text-3xl font-bold mb-6">Inventory</h1>
+  <table class="w-full glass rounded-2xl">
+    <tbody id="inventory-body"></tbody>
+  </table>
+</div>
 
-        <div class="flex justify-between items-center mb-6 text-lg">
-          <span
+<!-- ORDER -->
+<div id="page-order" class="hidden">
+  <h1 class="text-3xl font-bold mb-6">New Order</h1>
+
+  <div id="order-items" class="mb-6"></div>
+
+  <select id="order-product" class="border p-2"></select>
+  <input id="order-qty" type="number" value="1" class="border p-2 w-20">
+
+  <button onclick="addToOrder()" class="bg-blue-500 text-white px-4 py-2">Add</button>
+  <button onclick="submitOrder()" class="bg-green-500 text-white px-4 py-2">Complete</button>
+</div>
+
+</div>
+
+<!-- SCRIPT -->
+<script>
+let inventory = [];
+let order = [];
+
+function navigate(page){
+  document.querySelectorAll('[id^="page-"]').forEach(p=>p.classList.add("hidden"));
+  document.getElementById("page-"+page).classList.remove("hidden");
+}
+
+function updateDashboard(){
+  document.getElementById("total-products").innerText = inventory.length;
+  document.getElementById("low-stock").innerText = inventory.filter(i=>i.qty<=5).length;
+  document.getElementById("total-value").innerText =
+    "$"+inventory.reduce((s,i)=>s+i.qty*i.price,0);
+}
+
+function renderInventory(){
+  let body = document.getElementById("inventory-body");
+  body.innerHTML = "";
+  inventory.forEach((i,index)=>{
+    body.innerHTML += `
+    <tr>
+      <td>${i.name}</td>
+      <td>${i.qty}</td>
+      <td><button onclick="deleteItem(${index})">Delete</button></td>
+    </tr>`;
+  });
+
+  let select = document.getElementById("order-product");
+  select.innerHTML="";
+  inventory.forEach((i,index)=>{
+    select.innerHTML += `<option value="${index}">${i.name}</option>`;
+  });
+}
+
+function deleteItem(i){
+  inventory.splice(i,1);
+  renderInventory();
+  updateDashboard();
+}
+
+function addToOrder(){
+  let i = document.getElementById("order-product").value;
+  let qty = Number(document.getElementById("order-qty").value);
+  if(inventory[i].qty < qty) return alert("Not enough stock");
+  order.push({...inventory[i], qty});
+  renderOrder();
+}
+
+function renderOrder(){
+  let el = document.getElementById("order-items");
+  el.innerHTML="";
+  order.forEach(o=>{
+    el.innerHTML += `<div>${o.name} x${o.qty}</div>`;
+  });
+}
+
+function submitOrder(){
+  order.forEach(o=>{
+    let item = inventory.find(i=>i.name===o.name);
+    item.qty -= o.qty;
+  });
+  order=[];
+  renderOrder();
+  renderInventory();
+  updateDashboard();
+}
+
+function resetData(){
+  inventory=[];
+  order=[];
+  renderInventory();
+  updateDashboard();
+}
+
+// starter data
+inventory = [
+  {name:"Shelf A", qty:10, price:50},
+  {name:"Bracket B", qty:3, price:15}
+];
+
+renderInventory();
+updateDashboard();
+</script>
+
+</body>
+</html>
